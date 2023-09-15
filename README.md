@@ -12,7 +12,7 @@ To be able to do so (*find the right controls to click on*) the main script heav
 
 ## Installation
 
-Download the latest version of the workflow itself and optionally its SHA-256 hash and PGP signature. Before [installing the workflow](https://www.alfredapp.com/blog/tips-and-tricks/tutorial-importing-and-setting-up-alfred-workflows/) it is recommended to verify its hash and signature:
+Download the [latest version](https://github.com/retifrav/alfred-airdrop-discoverability/releases/latest) of the workflow itself and optionally its SHA-256 hash and PGP signature. Before [installing the workflow](https://www.alfredapp.com/blog/tips-and-tricks/tutorial-importing-and-setting-up-alfred-workflows/) it is recommended to verify its hash and signature:
 
 ``` sh
 $ shasum -c ./airdrop-discoverability.alfredworkflow.sha256
