@@ -1,6 +1,6 @@
 # AirDrop discoverability
 
-[Alfred workflow](https://alfredapp.com/workflows/) for toggling [AirDrop](https://en.wikipedia.org/wiki/AirDrop) discoverability.
+[Alfred workflow](https://alfredapp.com/workflows/) for toggling [AirDrop](https://en.wikipedia.org/wiki/AirDrop) discoverability. This is about controlling your Mac discoverability so other devices could send files *to* it, so this is not about sharing files *from* it.
 
 ![AirDrop discoverability](https://raw.githubusercontent.com/retifrav/alfred-airdrop-discoverability/master/misc/airdrop-discoverability.png "Choosing AirDrop discoverability level")
 
