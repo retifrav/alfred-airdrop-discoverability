@@ -2,6 +2,8 @@
 
 [Alfred workflow](https://alfredapp.com/workflows/) for toggling [AirDrop](https://en.wikipedia.org/wiki/AirDrop) discoverability.
 
+![AirDrop discoverability](https://raw.githubusercontent.com/retifrav/alfred-airdrop-discoverability/master/misc/airdrop-discoverability.png "Choosing AirDrop discoverability level")
+
 ## How does it work
 
 Since there is no(?) API for toggling AirDrop discoverability, one has to manually click through controls in the Finder window. And that is what this workflow does - it automates clicking on Finder UI controls using [Mac OS Accessibility](https://support.apple.com/guide/mac-help/get-started-with-accessibility-features-mh35884/mac) functionality via [AppleScript](https://en.wikipedia.org/wiki/AppleScript).
@@ -10,5 +12,5 @@ To be able to do so (*find the right controls to click on*) the main script heav
 
 ## 3rd-party
 
-- AirDrop icon from Apple Mac OS resources `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AirDrop.icns`;
+- AirDrop icon from Apple Mac OS resources (*`/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AirDrop.icns`*);
 - icons from Apple [SF Symbols](https://developer.apple.com/sf-symbols/) collection.
