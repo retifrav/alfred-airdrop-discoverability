@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>dev.decovar.airdrop-discoverability</string>
+	<key>category</key>
+	<string>Tools</string>
+	<key>connections</key>
+	<dict>
+		<key>00AFFCCF-3413-4355-A183-8870CE6CE385</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>80EF3961-4B40-49C4-9E5B-B4AE5A943311</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>80EF3961-4B40-49C4-9E5B-B4AE5A943311</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>C1EABAE2-664D-4DBC-A3BA-CC2F491C727F</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>retif</string>
+	<key>description</key>
+	<string>Toggle AirDrop discoverability</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>AirDrop discoverability</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>68</integer>
+				<key>script</key>
+				<string>on run argv
+    -- 1 - No One
+    -- 2 - Contact Only
+    -- 3 - Everyone
+    set discoverabilityLevel to 0
+
+    -- repeat with arg in argv -- argv is a list {}, even if there is only one argument
+    --     displayMsg(arg, missing value)
+    -- end repeat
+
+    set argc to count argv
+
+    if argc &gt; 1 then
+        error "Too many arguments provided, expected only one (discoverability level)"
+    end if
+
+    if argc is 0 then
+        set discoverabilityLevel to 1
+    else
+        -- the last result will be returned
+        set discoverabilityLevel to first item of argv
+    end if
+
+	applyDiscoverabilityLevel(discoverabilityLevel)
+
+    return -- otherwise it will also print the last command
+end run
+
+on applyDiscoverabilityLevel(discoverabilityLevel)
+    -- there is no list of integers in AppleScript, so need to cast to string and check in a list of strings
+    if discoverabilityLevel as string is not in {"1", "2", "3"} then
+        set msg to "Wrong value, discoverability level can be only 1, 2 or 3"
+        displayMsg(msg, missing value)
+        error msg
+    end if
+    -- for some reason need to explicitly cast it to integer, otherwise click won't actually click
+    set discoverabilityLevel to discoverabilityLevel as integer
+
+    tell application "Finder"
+        make new Finder window
+        activate
+    end tell
+
+    tell application "System Events" to tell process "Finder"
+        keystroke "R" using {command down, shift down}
+        # check if Bluetooth is disabled
+        set bluetoothButton to a reference to (first button of splitter group 1 of window 1) -- neither of these works: whose name is "Turn On Bluetooth" / whose value of attribute "Title" is "Turn On Bluetooth"
+        if bluetoothButton exists then
+            -- for some reason cannot put both of these conditions into one if statement
+            if discoverabilityLevel is not 1 then
+                click bluetoothButton
+            else
+                -- Bluetooth is off and selected discoverability level is 1, won't enable Bluetooth then
+                tell application "Finder"
+                    close first window
+                end tell
+                return
+            end if
+        end if
+        # open the "Allow me to be discovered by" dropdown
+        click button 1 of splitter group 1 of splitter group 1 of window 1
+        # select the discoverability level
+        click radio button discoverabilityLevel of pop over 1 of splitter group 1 of splitter group 1 of window 1
+
+        # close current Finder window, otherwise they'll spam the user eventually
+        tell application "Finder"
+            close first window
+        end tell
+
+        -- check if user configured toggling off Bluetooth as well
+        set toggleOffBluetooth to (system attribute "toggle_off_bluetooth") as integer
+
+        # also disable Bluetooth
+        if discoverabilityLevel is 1 and toggleOffBluetooth is 1 then
+            tell application "System Events"
+                tell process "ControlCenter"
+                    try -- via Menu Bar icon first
+                        # check if user has added Bluetooth to Menu Bar
+                        set mbiBluetooth to a reference to first item of (get menu bar items of menu bar 1) whose description is "Bluetooth"
+                        if mbiBluetooth exists then
+                            -- log "[DEBUG] Found Bluetooth icon on Menu Bar"
+                            click mbiBluetooth
+                        else
+                            error "There is no Bluetooth icon on Menu Bar, you need to add it there first"
+                        end if
+
+                        # no IDs or labels, have to rely on ordinals
+                        set tglBluetooth to first checkbox of group 1 of window "Control Centre"
+                        tell tglBluetooth
+                            if (its value as boolean) then click tglBluetooth
+                        end tell
+                    on error -- fallback to Control Centre
+                        -- log "[DEBUG] User does not have Bluetooth icon on Menu Bar, falling back to Control Centre"
+                        set mbiControlCentre to a reference to first item of (get menu bar items of menu bar 1) whose description is "Control Centre"
+                        if mbiControlCentre exists then
+                            click mbiControlCentre
+                        else
+                            -- there is no fallback for this scenario, so the script should fail
+                            error "Couldn't find Control Centre on Menu Bar"
+                        end if
+
+                        # no IDs or labels, have to rely on ordinals
+                        set tglBluetooth to checkbox 3 of group 1 of window "Control Centre"
+                        tell tglBluetooth
+                            if (its value as boolean) then click tglBluetooth
+                        end tell
+                    end try
+
+                    key code 53 -- ESC
+                end tell
+            end tell
+        end if
+    end tell
+end applyDiscoverabilityLevel
+
+on displayMsg(msg, autoCloseTimeout)
+    if autoCloseTimeout is missing value then set autoCloseTimeout to 0
+    display dialog msg buttons {"OK"} default button "OK" giving up after autoCloseTimeout
+end displayMsg</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>6</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>C1EABAE2-664D-4DBC-A3BA-CC2F491C727F</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>2</integer>
+				<key>keyword</key>
+				<string>airdrop</string>
+				<key>subtext</key>
+				<string>Toggle AirDrop discoverability level</string>
+				<key>text</key>
+				<string>AirDrop discoverability</string>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.keyword</string>
+			<key>uid</key>
+			<string>00AFFCCF-3413-4355-A183-8870CE6CE385</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>fixedorder</key>
+				<true/>
+				<key>items</key>
+				<string>[{"imagefile":"672de59c8c51c4a6760777b5a879b90a42c539bc.png","title":"No One","arg":"1"},{"imagefile":"e62c361375a80746299a23f07df50cf24b675025.png","title":"Contacts Only","arg":"2"},{"imagefile":"a0dbdb47e4f7baa66d895f3acbf6cecc48746b72.png","title":"Everyone","arg":"3"}]</string>
+				<key>matchmode</key>
+				<integer>0</integer>
+				<key>runningsubtext</key>
+				<string></string>
+				<key>subtext</key>
+				<string>Select which AirDrop discoverability level you would like to set</string>
+				<key>title</key>
+				<string>Desired discoverability level</string>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.listfilter</string>
+			<key>uid</key>
+			<string>80EF3961-4B40-49C4-9E5B-B4AE5A943311</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string># AirDrop discoverability
+
+Toggling AirDrop discoverability:
+
+- `No One`
+- `Contacts Only`
+- `Everyone`
+
+Also can optionally toggle Bluetooth off, when setting `No One` discoverability level.
+
+## How does it work
+
+The workflow uses an AppleScript to click on UI controls, which means two things:
+
+1. You will see windows (*Finder, Control Centre, etc*) openning and closing, buttons/toggles being clicked/toggled, which is not a great user experience. Unfortunatelly, Apple doesn't provide an API for performing these operations in a less ugly manner;
+2. The script heavily relies on UI controls ordinals, since there are no IDs or labels, which means that it might stop working correctly in one of the next Mac OS versions. Currently tested Mac OS version is `13.5.2`.</string>
+	<key>uidata</key>
+	<dict>
+		<key>00AFFCCF-3413-4355-A183-8870CE6CE385</key>
+		<dict>
+			<key>xpos</key>
+			<real>145</real>
+			<key>ypos</key>
+			<real>85</real>
+		</dict>
+		<key>80EF3961-4B40-49C4-9E5B-B4AE5A943311</key>
+		<dict>
+			<key>xpos</key>
+			<real>395</real>
+			<key>ypos</key>
+			<real>110</real>
+		</dict>
+		<key>C1EABAE2-664D-4DBC-A3BA-CC2F491C727F</key>
+		<dict>
+			<key>xpos</key>
+			<real>690</real>
+			<key>ypos</key>
+			<real>80</real>
+		</dict>
+	</dict>
+	<key>userconfigurationconfig</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<true/>
+				<key>required</key>
+				<false/>
+				<key>text</key>
+				<string>Setting "No One" also toggles off Bluetooth</string>
+			</dict>
+			<key>description</key>
+			<string>If this checkbox is set, then when you select "No One" discoverability level, the Bluetooth will be toggled off as well</string>
+			<key>label</key>
+			<string></string>
+			<key>type</key>
+			<string>checkbox</string>
+			<key>variable</key>
+			<string>toggle_off_bluetooth</string>
+		</dict>
+	</array>
+	<key>variablesdontexport</key>
+	<array/>
+	<key>version</key>
+	<string>0.9.1</string>
+	<key>webaddress</key>
+	<string>https://github.com/retifrav/alfred-airdrop-discoverability</string>
+</dict>
+</plist>
