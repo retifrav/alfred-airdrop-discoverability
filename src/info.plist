@@ -319,7 +319,9 @@ Also can optionally toggle Bluetooth off, when setting `No One` discoverability 
 The workflow uses an AppleScript to click on UI controls, which means two things:
 
 1. You will see windows (*Finder, Control Centre, etc*) openning and closing, buttons/toggles being clicked/toggled, which is not a great user experience. Unfortunatelly, Apple doesn't provide an API for performing these operations in a less ugly manner;
-2. The script heavily relies on UI controls ordinals, since there are no IDs or labels, which means that it might stop working correctly in one of the next Mac OS versions. Currently tested Mac OS version is `13.5.2`.
+2. The script heavily relies on UI controls ordinals, since there are no IDs or labels, which means that it might stop working correctly in one of the next Mac OS versions. Currently tested Mac OS versions are:
+    - `13.5.2`;
+    - `14.4`.
 
 You can get rid of Finder window showing up by adding AirDrop icon to Menu Bar via Control Centre Modules in System Settings.</string>
 	<key>uidata</key>
