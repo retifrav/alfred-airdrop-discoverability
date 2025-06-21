@@ -59,6 +59,10 @@
     -- 3 - Everyone
     set discoverabilityLevel to 0
 
+    -- repeat with arg in argv -- argv is a list {}, even if there is only one argument
+    --     displayMsg(arg, missing value)
+    -- end repeat
+
     set argc to count argv
 
     if argc &gt; 1 then
@@ -168,24 +172,45 @@ on toggleAirDropViaFinder(discoverabilityLevel)
 
     tell application "System Events" to tell process "Finder"
         keystroke "R" using {command down, shift down}
+        --
         -- check if Bluetooth is disabled
-        set bluetoothButton to a reference to (first button of splitter group 1 of window 1) -- neither of these works: whose name is "Turn On Bluetooth" / whose value of attribute "Title" is "Turn On Bluetooth"
-        if bluetoothButton exists then
-            -- for some reason cannot put both of these conditions into one if statement
-            if discoverabilityLevel is not 1 then
-                click bluetoothButton
-            else
-                -- Bluetooth is off and selected discoverability level is 1, won't enable Bluetooth then
-                tell application "Finder"
-                    close first window
-                end tell
-                return
-            end if
-        end if
+        -- (
+        --     looks like this isn't needed anymore starting with Mac OS 15.5 Sequoia, because it is turned on regardless,
+        --     so this step is redundant
+        -- )
+        -- set bluetoothButton to a reference to (first button of splitter group 1 of window 1) -- neither of these works: whose name is "Turn On Bluetooth" / whose value of attribute "Title" is "Turn On Bluetooth"
+        -- if bluetoothButton exists then
+        --     -- for some reason cannot put both of these conditions into one if statement
+        --     if discoverabilityLevel is not 1 then
+        --         click bluetoothButton
+        --     else
+        --         -- Bluetooth is off and selected discoverability level is 1, won't enable Bluetooth then
+        --         tell application "Finder"
+        --             close first window
+        --         end tell
+        --         return
+        --     end if
+        -- end if
+        --
         -- open the "Allow me to be discovered by" dropdown
-        click button 1 of splitter group 1 of splitter group 1 of window 1
+        -- (
+        --     starting with Mac OS 15.5 Sequoia this went to shit, because in different situations, which I could not
+        --     establish which is which, the button ID might `2` or it might be `1`, and what's amazing is that
+        --     if you'll first check for the existence of the button `1`, then it fucking will be existing,
+        --     though the "correct" button will be actually `2` (as if they both exist at that same moment,
+        --     but one is hidden or something), so this is fucked, but luckly if you do the check the other way around,
+        --     so first you check for the existence of the button `2`, then it will correctly get that it does not exist
+        --     and will fallback to button `1`, what is the actual fuck
+        -- )
+        set discoverabilityButton to a reference to (button 2 of group 1 of splitter group 1 of splitter group 1 of window 1)
+        -- it is also cute how you can do `if discoverabilityButton exists then` for negative condition you need to do this
+        if not (exists discoverabilityButton) then
+            set discoverabilityButton to a reference to (button 1 of group 1 of splitter group 1 of splitter group 1 of window 1)
+        end if
+        click discoverabilityButton
+
         -- select the discoverability level
-        click radio button discoverabilityLevel of pop over 1 of splitter group 1 of splitter group 1 of window 1
+        click button discoverabilityLevel of group 1 of pop over 1 of group 1 of splitter group 1 of splitter group 1 of window 1
 
         -- close current Finder window, otherwise they'll spam the user eventually
         tell application "Finder"
@@ -319,9 +344,10 @@ Also can optionally toggle Bluetooth off, when setting `No One` discoverability 
 The workflow uses an AppleScript to click on UI controls, which means two things:
 
 1. You will see windows (*Finder, Control Centre, etc*) openning and closing, buttons/toggles being clicked/toggled, which is not a great user experience. Unfortunatelly, Apple doesn't provide an API for performing these operations in a less ugly manner;
-2. The script heavily relies on UI controls ordinals, since there are no IDs or labels, which means that it might stop working correctly in one of the next Mac OS versions. Currently tested Mac OS versions are:
-    - `13.5.2`;
-    - `14.4`.
+2. The script heavily relies on UI controls ordinals, since there are no IDs or labels, which means that it might stop working correctly in one of the next Mac OS versions. Currently tested versions are:
+    - Mac OS `13.5.2`, workflow version `0.9.2`;
+    - Mac OS `14.4`, workflow version `0.9.2`;
+    - Mac OS `15.5`, workflow version `1.0.0`.
 
 You can get rid of Finder window showing up by adding AirDrop icon to Menu Bar via Control Centre Modules in System Settings.</string>
 	<key>uidata</key>
@@ -370,10 +396,8 @@ You can get rid of Finder window showing up by adding AirDrop icon to Menu Bar v
 			<string>TOGGLE_OFF_BLUETOOTH</string>
 		</dict>
 	</array>
-	<key>variablesdontexport</key>
-	<array/>
 	<key>version</key>
-	<string>0.9.2</string>
+	<string>1.0.0</string>
 	<key>webaddress</key>
 	<string>https://github.com/retifrav/alfred-airdrop-discoverability</string>
 </dict>
