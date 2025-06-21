@@ -10,7 +10,7 @@ Since there is no(?) API for toggling AirDrop discoverability, one has to manual
 
 To be able to do so (*find the right controls to click on*) the main script heavily relies on controls ordinals, such as `button 1 of splitter group 1 of window 1`, because there are no IDs/labels (*anymore?*), and so this entire logic is rather fragile and will likely "break" with one of the next Mac OS versions. When/if this happens, the script will need to be adjusted to correctly find the controls again.
 
-And since it uses Accessibility, you can expect seeing windows (*Finder, Control Centre, etc*) opening and closing, buttons/toggles being clicked/toggled. You can get rid of Finder window showing up by adding AirDrop icon to Menu Bar via Control Centre Modules in System Settings.
+And since it uses Accessibility, you can expect seeing windows (*Finder, Control Centre, etc*) opening and closing and buttons/toggles being clicked/toggled. If you don't have AirDrop icon added to the Menu Bar (*via Control Centre Modules in System Settings*), then it will click through the Finder window, which looks quite annoying, so you might want to consider adding the AirDrop icon to the Menu Bar, as clicking through that one will look less annoying manner.
 
 ## Installation
 
@@ -18,10 +18,10 @@ Download the [latest version](https://github.com/retifrav/alfred-airdrop-discove
 
 ``` sh
 $ shasum -c ./airdrop-discoverability.alfredworkflow.sha256
-$ gpg --verify ./airdrop-discoverability.alfredworkflow.sig
-```
 
-The signing PGP key is [here](https://decovar.dev/about/retif-public.asc).
+$ curl -sS https://decovar.dev/about/retif-public.asc | gpg --import -
+$ gpg --verify ./airdrop-discoverability.alfredworkflow.sig ./airdrop-discoverability.alfredworkflow
+```
 
 ## 3rd-party
 
