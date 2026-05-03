@@ -27,7 +27,8 @@ Different versions of the workflow work with different versions of Mac OS:
 
 - Mac OS `13.5.2` Ventura, workflow version `0.9.2`;
 - Mac OS `14.4` Sonoma, workflow version `0.9.2`;
-- Mac OS `15.5` Sequoia, workflow version `1.0.0`.
+- Mac OS `15.5` Sequoia, workflow version `1.0.0`;
+- Mac OS `26.4.1` Tahoe, workflow version `1.0.0`.
 
 ## Installation
 
