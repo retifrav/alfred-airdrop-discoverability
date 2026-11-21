@@ -1,6 +1,9 @@
-/.github/           export-ignore
+/.github/       export-ignore
 
-/.gitignore         export-ignore
-/.gitattributes     export-ignore
+/.gitignore     export-ignore
+/.gitattributes export-ignore
 
-/CLAUDE.md          export-ignore
+/debugging/     export-ignore
+
+/CLAUDE.md      export-ignore
+/.claude/       export-ignore

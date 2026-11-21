@@ -8,19 +8,6 @@
 	<string>Tools</string>
 	<key>connections</key>
 	<dict>
-		<key>00AFFCCF-3413-4355-A183-8870CE6CE385</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>80EF3961-4B40-49C4-9E5B-B4AE5A943311</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
 		<key>80EF3961-4B40-49C4-9E5B-B4AE5A943311</key>
 		<array>
 			<dict>
@@ -385,52 +372,87 @@ end displayMsg</string>
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>argumenttype</key>
-				<integer>2</integer>
-				<key>keyword</key>
-				<string>airdrop</string>
-				<key>subtext</key>
-				<string>Toggle AirDrop discoverability level</string>
-				<key>text</key>
-				<string>AirDrop discoverability</string>
-				<key>withspace</key>
-				<false/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.input.keyword</string>
-			<key>uid</key>
-			<string>00AFFCCF-3413-4355-A183-8870CE6CE385</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
+				<key>alfredfiltersresults</key>
+				<true/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<true/>
 				<key>argumenttrimmode</key>
 				<integer>0</integer>
 				<key>argumenttype</key>
 				<integer>1</integer>
-				<key>fixedorder</key>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>airdrop</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
 				<true/>
-				<key>items</key>
-				<string>[{"imagefile":"672de59c8c51c4a6760777b5a879b90a42c539bc.png","title":"No One","arg":"1"},{"imagefile":"e62c361375a80746299a23f07df50cf24b675025.png","title":"Contacts Only","arg":"2"},{"imagefile":"a0dbdb47e4f7baa66d895f3acbf6cecc48746b72.png","title":"Everyone","arg":"3"}]</string>
-				<key>matchmode</key>
+				<key>queuedelaymode</key>
 				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
 				<key>runningsubtext</key>
 				<string></string>
+				<key>script</key>
+				<string># Alfred runs this with zsh, but it sticks to POSIX sh (no arrays, every expansion quoted),
+# so it can also be tested with sh/bash on a system without zsh
+
+# unlike setting it, reading the current discoverability level needs no clicking,
+# because `sharingd` keeps it in its preferences as Off (No One), Contacts Only
+# or Everyone, and it has to be read via `defaults` (which asks `cfprefsd`),
+# not from the plist file, as the file might not be up to date yet
+# (
+#     that is the level which is set, so with Bluetooth or Wi-Fi off AirDrop is off
+#     regardless, but this is deliberately not checked here, to keep it simple
+# )
+case "$(defaults read com.apple.sharingd DiscoverableMode 2&gt;/dev/null)" in
+    'Off') current=1 ;;
+    'Contacts Only') current=2 ;;
+    'Everyone') current=3 ;;
+    *) current=0 ;;
+esac
+
+# one of the discoverability levels: 1 - level number (the arg for the AppleScript), 2 - title, 3 - icon
+printLevel()
+{
+    if [ "$1" = "$current" ]; then
+        subtitle=',"subtitle":"(current level)"'
+    else
+        subtitle=''
+    fi
+    printf '{"title":"%s","arg":"%s","icon":{"path":"List Filter Images/%s"}%s}' "$2" "$1" "$3" "$subtitle"
+}
+
+# no item has an uid and Alfred's knowledge is skipped, so the items are always shown in this order
+printf '{"skipknowledge":true,"items":['
+printLevel 1 'No One' '672de59c8c51c4a6760777b5a879b90a42c539bc.png'
+printf ','
+printLevel 2 'Contacts Only' 'e62c361375a80746299a23f07df50cf24b675025.png'
+printf ','
+printLevel 3 'Everyone' 'a0dbdb47e4f7baa66d895f3acbf6cecc48746b72.png'
+printf ']}\n'</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
 				<key>subtext</key>
-				<string>Select which AirDrop discoverability level you would like to set</string>
+				<string>Toggle AirDrop discoverability level</string>
 				<key>title</key>
-				<string>Desired discoverability level</string>
+				<string>AirDrop discoverability</string>
+				<key>type</key>
+				<integer>11</integer>
 				<key>withspace</key>
-				<true/>
+				<false/>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.input.listfilter</string>
+			<string>alfred.workflow.input.scriptfilter</string>
 			<key>uid</key>
 			<string>80EF3961-4B40-49C4-9E5B-B4AE5A943311</string>
 			<key>version</key>
-			<integer>1</integer>
+			<integer>3</integer>
 		</dict>
 	</array>
 	<key>readme</key>
@@ -459,13 +481,6 @@ The workflow uses an AppleScript to click on UI controls, which means two things
 You can get rid of Finder window showing up by adding AirDrop icon to Menu Bar via Control Centre Modules in System Settings.</string>
 	<key>uidata</key>
 	<dict>
-		<key>00AFFCCF-3413-4355-A183-8870CE6CE385</key>
-		<dict>
-			<key>xpos</key>
-			<real>145</real>
-			<key>ypos</key>
-			<real>85</real>
-		</dict>
 		<key>80EF3961-4B40-49C4-9E5B-B4AE5A943311</key>
 		<dict>
 			<key>xpos</key>

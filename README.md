@@ -3,6 +3,7 @@
 <!-- MarkdownTOC -->
 
 - [How does it work](#how-does-it-work)
+    - [Getting current discoverability level](#getting-current-discoverability-level)
     - [Tested Mac OS versions](#tested-mac-os-versions)
 - [Installation](#installation)
 - [3rd-party](#3rd-party)
@@ -21,6 +22,14 @@ Since there is no(?) API for toggling AirDrop discoverability, one has to manual
 To be able to do so (*find the right controls to click on*) the main script mostly relies on controls ordinals, such as `pop up button 1 of group 1 of splitter group 1 of splitter group 1 of window 1`, because most of the controls have no IDs/labels. In Mac OS 27 Golden Gate some of them do have identifiers, such as the Menu Bar icons (*`com.apple.menuextra.airdrop`*) and the Bluetooth toggle in Control Centre (*`controlcenter-bluetooth`*), and the script finds those by their identifiers instead. Still, Apple keeps reshuffling these UIs (*Mac OS 27 moved the Menu Bar icons to a different process and turned the Finder dropdown into a different kind of control*), so this entire logic is rather fragile and will likely "break" with one of the next Mac OS versions. When/if this happens, the script will need to be adjusted to correctly find the controls again.
 
 And since it uses Accessibility, you can expect seeing windows (*Finder, Control Centre, etc*) opening and closing and buttons/toggles being clicked/toggled. If you don't have AirDrop icon added to the Menu Bar (*via Control Centre Modules in System Settings*), then it will click through the Finder window, which looks quite annoying, so you might want to consider adding the AirDrop icon to the Menu Bar, as clicking through that one will look less annoying manner.
+
+### Getting current discoverability level
+
+Mac OS keeps current discoverability level in the AirDrop preferences, which can be read with `defaults read com.apple.sharingd DiscoverableMode` - no UI controls clicking required for that - and so when you type the workflow keyword, the option with the current level is marked as such.
+
+Worth to mention that it only shows the level which was set, and with Bluetooth or Wi-Fi turned off the AirDrop will be also off regardless.
+
+One might also think that `defaults write com.apple.sharingd DiscoverableMode -string Off` (*`"Contacts Only"`, `"Everyone"`*) would set the level, so there should be no need to click all those UI controls, but that doesn't actually work (*or at least it doesn't without also running `killall sharingd`, which also isn't a guarantee*).
 
 ### Tested Mac OS versions
 
