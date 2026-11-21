@@ -6,6 +6,7 @@
     - [Tested Mac OS versions](#tested-mac-os-versions)
 - [Installation](#installation)
 - [3rd-party](#3rd-party)
+- [Donation](#donation)
 
 <!-- /MarkdownTOC -->
 
@@ -45,3 +46,10 @@ $ gpg --verify ./airdrop-discoverability.alfredworkflow.sig ./airdrop-discoverab
 
 - AirDrop icon from Apple Mac OS resources (*`/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AirDrop.icns`*);
 - icons from Apple [SF Symbols](https://developer.apple.com/sf-symbols/) collection.
+
+## Donation
+
+You can support this project via [GitHub Sponsors](https://github.com/sponsors/retifrav) or by donating cryptocurrency to either of the following wallets (*[signed variant](https://decovar.dev/donation.txt)*):
+
+- XLM: `GDYB2QGJYWT6VPT7O7INWIGRGJF5ZEAQ7Y73S4T47IOP2QQ554NPN3ZM`
+- BTC: `bc1q2kfqwm2kwyw37ay2g4tnguasvp6j4hsmtrgjte`
