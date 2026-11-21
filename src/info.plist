@@ -347,7 +347,8 @@ The workflow uses an AppleScript to click on UI controls, which means two things
 2. The script heavily relies on UI controls ordinals, since there are no IDs or labels, which means that it might stop working correctly in one of the next Mac OS versions. Currently tested versions are:
     - Mac OS `13.5.2`, workflow version `0.9.2`;
     - Mac OS `14.4`, workflow version `0.9.2`;
-    - Mac OS `15.5`, workflow version `1.0.0`.
+    - Mac OS `15.5`, workflow version `1.0.0`;
+    - Mac OS `26.4.1`, workflow version `1.0.0`.
 
 You can get rid of Finder window showing up by adding AirDrop icon to Menu Bar via Control Centre Modules in System Settings.</string>
 	<key>uidata</key>
