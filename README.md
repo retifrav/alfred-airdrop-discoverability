@@ -16,9 +16,9 @@
 
 ## How does it work
 
-Since there is no(?) API for toggling AirDrop discoverability, one has to manually click through controls in the Finder window. And that is what this workflow does - it automates clicking on Finder UI controls using [Mac OS Accessibility](https://support.apple.com/guide/mac-help/get-started-with-accessibility-features-mh35884/mac) functionality via [AppleScript](https://en.wikipedia.org/wiki/AppleScript).
+Since there is no(?) API for toggling AirDrop discoverability, one has to manually click through controls in Control Centre or in the Finder window. And that is what this workflow does - it automates clicking on those UI controls using [Mac OS Accessibility](https://support.apple.com/guide/mac-help/get-started-with-accessibility-features-mh35884/mac) functionality via [AppleScript](https://en.wikipedia.org/wiki/AppleScript).
 
-To be able to do so (*find the right controls to click on*) the main script heavily relies on controls ordinals, such as `button 1 of splitter group 1 of window 1`, because there are no IDs/labels (*anymore?*), and so this entire logic is rather fragile and will likely "break" with one of the next Mac OS versions. When/if this happens, the script will need to be adjusted to correctly find the controls again.
+To be able to do so (*find the right controls to click on*) the main script mostly relies on controls ordinals, such as `pop up button 1 of group 1 of splitter group 1 of splitter group 1 of window 1`, because most of the controls have no IDs/labels. In Mac OS 27 Golden Gate some of them do have identifiers, such as the Menu Bar icons (*`com.apple.menuextra.airdrop`*) and the Bluetooth toggle in Control Centre (*`controlcenter-bluetooth`*), and the script finds those by their identifiers instead. Still, Apple keeps reshuffling these UIs (*Mac OS 27 moved the Menu Bar icons to a different process and turned the Finder dropdown into a different kind of control*), so this entire logic is rather fragile and will likely "break" with one of the next Mac OS versions. When/if this happens, the script will need to be adjusted to correctly find the controls again.
 
 And since it uses Accessibility, you can expect seeing windows (*Finder, Control Centre, etc*) opening and closing and buttons/toggles being clicked/toggled. If you don't have AirDrop icon added to the Menu Bar (*via Control Centre Modules in System Settings*), then it will click through the Finder window, which looks quite annoying, so you might want to consider adding the AirDrop icon to the Menu Bar, as clicking through that one will look less annoying manner.
 
@@ -29,11 +29,12 @@ Different versions of the workflow work with different versions of Mac OS:
 - Mac OS `13.5.2` Ventura, workflow version `0.9.2`;
 - Mac OS `14.4` Sonoma, workflow version `0.9.2`;
 - Mac OS `15.5` Sequoia, workflow version `1.0.0`;
-- Mac OS `26.4.1` Tahoe, workflow version `1.0.0`.
+- Mac OS `26.4.1` Tahoe, workflow version `1.0.0`;
+- Mac OS `27.2.1` Golden Gate, workflow version `2026.11.21`.
 
 ## Installation
 
-Download the [latest version](https://github.com/retifrav/alfred-airdrop-discoverability/releases/latest) of the workflow itself and optionally its SHA-256 hash and PGP signature. Before [installing the workflow](https://www.alfredapp.com/blog/tips-and-tricks/tutorial-importing-and-setting-up-alfred-workflows/) it is recommended to verify its hash and signature:
+Download the [latest version](https://github.com/retifrav/alfred-airdrop-discoverability/releases/latest) of the workflow itself and optionally its SHA-256 hash and PGP signature. Before [installing the workflow](https://alfredapp.com/blog/tips-and-tricks/tutorial-importing-and-setting-up-alfred-workflows/) it is recommended to verify its hash and signature:
 
 ``` sh
 $ shasum -c ./airdrop-discoverability.alfredworkflow.sha256

@@ -107,15 +107,23 @@ on toggleAirDropViaMenuBar(discoverabilityLevel)
         tell process "ControlCenter"
             try -- via Menu Bar icon first
                 -- check if user has added AirDrop to Menu Bar
-                set mbiAirDrop to a reference to first item of (get menu bar items of menu bar 1) whose description is "AirDrop"
-                if mbiAirDrop exists then
-                    -- log "[DEBUG] Found AirDrop icon on Menu Bar"
-                    click mbiAirDrop
-                else
+                -- (
+                --     disabled, this worked up to Mac OS 26, but with Mac OS 27.2.1 the Menu Bar icons
+                --     are not in the ControlCenter process anymore, see `clickMenuBarIcon()`
+                -- )
+                -- set mbiAirDrop to a reference to first item of (get menu bar items of menu bar 1) whose description is "AirDrop"
+                -- if mbiAirDrop exists then
+                --     -- log "[DEBUG] Found AirDrop icon on Menu Bar"
+                --     click mbiAirDrop
+                -- else
+                --     error "There is no AirDrop icon on Menu Bar, you need to add it there first"
+                -- end if
+                if not (my clickMenuBarIcon("com.apple.menuextra.airdrop")) then
                     error "There is no AirDrop icon on Menu Bar, you need to add it there first"
                 end if
 
                 -- no IDs or labels, have to rely on ordinals
+                my waitForElement(a reference to first checkbox of group 1 of window "Control Centre")
                 set tglAirDrop to first checkbox of group 1 of window "Control Centre"
                 if discoverabilityLevel is 1 then
                     tell tglAirDrop
@@ -126,6 +134,8 @@ on toggleAirDropViaMenuBar(discoverabilityLevel)
                         if not (its value as boolean) then click tglAirDrop
                     end tell
 
+                    -- the level options only appear once AirDrop is on
+                    my waitForElement(a reference to checkbox discoverabilityLevel of group 1 of window "Control Centre")
                     set tglAirDropDiscoverability to checkbox discoverabilityLevel of group 1 of window "Control Centre"
                     tell tglAirDropDiscoverability
                         if not (its value as boolean) then click tglAirDropDiscoverability
@@ -202,15 +212,34 @@ on toggleAirDropViaFinder(discoverabilityLevel)
         --     so first you check for the existence of the button `2`, then it will correctly get that it does not exist
         --     and will fallback to button `1`, what is the actual fuck
         -- )
-        set discoverabilityButton to a reference to (button 2 of group 1 of splitter group 1 of splitter group 1 of window 1)
-        -- it is also cute how you can do `if discoverabilityButton exists then` for negative condition you need to do this
-        if not (exists discoverabilityButton) then
-            set discoverabilityButton to a reference to (button 1 of group 1 of splitter group 1 of splitter group 1 of window 1)
-        end if
-        click discoverabilityButton
+        -- (
+        --     disabled, this worked up to Mac OS 26, but with Mac OS 27.2.1 the dropdown is not a button anymore
+        -- )
+        -- set discoverabilityButton to a reference to (button 2 of group 1 of splitter group 1 of splitter group 1 of window 1)
+        -- -- it is also cute how you can do `if discoverabilityButton exists then` for negative condition you need to do this
+        -- if not (exists discoverabilityButton) then
+        --     set discoverabilityButton to a reference to (button 1 of group 1 of splitter group 1 of splitter group 1 of window 1)
+        -- end if
+        -- click discoverabilityButton
+        --
+        -- -- select the discoverability level
+        -- click button discoverabilityLevel of group 1 of pop over 1 of group 1 of splitter group 1 of splitter group 1 of window 1
+        --
+        -- (
+        --     with Mac OS 27.2.1 the dropdown is a pop up button with a menu instead of a button with a pop over,
+        --     and when Bluetooth is off the same group also has an unlabelled button (next to the
+        --     "Turn on Bluetooth to share with AirDrop." text), which is probably what made the button ordinals
+        --     above so confusing on Mac OS 15.5; addressing the pop up button by its own class doesn't depend
+        --     on that, and waiting for it covers the AirDrop view not being loaded yet right after the keystroke
+        -- )
+        set discoverabilityPopUp to a reference to (pop up button 1 of group 1 of splitter group 1 of splitter group 1 of window 1)
+        my waitForElement(discoverabilityPopUp)
+        click discoverabilityPopUp
 
-        -- select the discoverability level
-        click button discoverabilityLevel of group 1 of pop over 1 of group 1 of splitter group 1 of splitter group 1 of window 1
+        -- select the discoverability level, menu items are in the same order: No One, Contacts Only, Everyone
+        set discoverabilityMenu to a reference to (menu 1 of discoverabilityPopUp)
+        my waitForElement(discoverabilityMenu)
+        click menu item discoverabilityLevel of discoverabilityMenu
 
         -- close current Finder window, otherwise they'll spam the user eventually
         tell application "Finder"
@@ -224,31 +253,55 @@ on toggleBluetoothOff()
         tell process "ControlCenter"
             try -- via Menu Bar icon first
                 -- check if user has added Bluetooth to Menu Bar
-                set mbiBluetooth to a reference to first item of (get menu bar items of menu bar 1) whose description is "Bluetooth"
-                if mbiBluetooth exists then
-                    -- log "[DEBUG] Found Bluetooth icon on Menu Bar"
-                    click mbiBluetooth
-                else
+                -- (
+                --     disabled, this worked up to Mac OS 26, see `toggleAirDropViaMenuBar()`
+                -- )
+                -- set mbiBluetooth to a reference to first item of (get menu bar items of menu bar 1) whose description is "Bluetooth"
+                -- if mbiBluetooth exists then
+                --     -- log "[DEBUG] Found Bluetooth icon on Menu Bar"
+                --     click mbiBluetooth
+                -- else
+                --     error "There is no Bluetooth icon on Menu Bar, you need to add it there first"
+                -- end if
+                if not (my clickMenuBarIcon("com.apple.menuextra.bluetooth")) then
                     error "There is no Bluetooth icon on Menu Bar, you need to add it there first"
                 end if
 
                 -- no IDs or labels, have to rely on ordinals
+                my waitForElement(a reference to first checkbox of group 1 of window "Control Centre")
                 set tglBluetooth to first checkbox of group 1 of window "Control Centre"
                 tell tglBluetooth
                     if (its value as boolean) then click tglBluetooth
                 end tell
             on error ex -- fallback to Control Centre
                 -- log "[DEBUG] " &amp; ex
-                set mbiControlCentre to a reference to first item of (get menu bar items of menu bar 1) whose description is "Control Centre"
-                if mbiControlCentre exists then
-                    click mbiControlCentre
-                else
+                -- (
+                --     disabled, this worked up to Mac OS 26, see `toggleAirDropViaMenuBar()`
+                -- )
+                -- set mbiControlCentre to a reference to first item of (get menu bar items of menu bar 1) whose description is "Control Centre"
+                -- if mbiControlCentre exists then
+                --     click mbiControlCentre
+                -- else
+                --     -- there is no fallback for this scenario, so the script should fail
+                --     error "Couldn't find Control Centre on Menu Bar"
+                -- end if
+                if not (my clickMenuBarIcon("com.apple.menuextra.controlcenter")) then
                     -- there is no fallback for this scenario, so the script should fail
                     error "Couldn't find Control Centre on Menu Bar"
                 end if
 
-                -- no IDs or labels, have to rely on ordinals
-                set tglBluetooth to checkbox 3 of group 1 of window "Control Centre"
+                -- (
+                --     disabled, this worked up to Mac OS 26, but with Mac OS 27.2.1 the Bluetooth toggle
+                --     is inside a module group of its own, see `findControlCentreModule()`
+                -- )
+                -- -- no IDs or labels, have to rely on ordinals
+                -- set tglBluetooth to checkbox 3 of group 1 of window "Control Centre"
+                set moduleBluetooth to my findControlCentreModule("controlcenter-bluetooth")
+                if moduleBluetooth is 0 then
+                    -- there is no fallback for this scenario either
+                    error "Couldn't find Bluetooth in Control Centre"
+                end if
+                set tglBluetooth to checkbox 1 of group moduleBluetooth of group 1 of window "Control Centre"
                 tell tglBluetooth
                     if (its value as boolean) then click tglBluetooth
                 end tell
@@ -258,6 +311,58 @@ on toggleBluetoothOff()
         end tell
     end tell
 end toggleBluetoothOff
+
+on clickMenuBarIcon(iconId)
+    -- (
+    --     with Mac OS 27.2.1 Apple's Menu Bar icons are hosted by the MenuBarAgent process instead of ControlCenter,
+    --     each as the only menu bar item of its own group, and they have no descriptions anymore, but they do have
+    --     identifiers, such as `com.apple.menuextra.airdrop`
+    -- )
+    tell application "System Events" to tell process "MenuBarAgent"
+        repeat with groupIndex from 1 to (count groups of menu bar 1)
+            try
+                set mbiId to value of attribute "AXIdentifier" of menu bar item 1 of group groupIndex of menu bar 1
+            on error
+                set mbiId to missing value
+            end try
+            if mbiId is iconId then
+                click menu bar item 1 of group groupIndex of menu bar 1
+                return true
+            end if
+        end repeat
+    end tell
+    return false
+end clickMenuBarIcon
+
+on findControlCentreModule(toggleId)
+    -- (
+    --     with Mac OS 27.2.1 every module in the Control Centre window is a group of its own, so ordinals
+    --     would depend on the modules layout, but their toggles have identifiers, such as `controlcenter-bluetooth`
+    -- )
+    tell application "System Events" to tell process "ControlCenter"
+        repeat 30 times -- the window might not be there yet right after the click, so up to 3 seconds
+            try
+                repeat with groupIndex from 1 to (count groups of group 1 of window "Control Centre")
+                    try
+                        if value of attribute "AXIdentifier" of checkbox 1 of group groupIndex of group 1 of window "Control Centre" is toggleId then return groupIndex
+                    end try
+                end repeat
+            end try
+            delay 0.1
+        end repeat
+    end tell
+    return 0
+end findControlCentreModule
+
+on waitForElement(uiElement)
+    -- up to 3 seconds, and if it still doesn't exist by then, the following click fails with a clear enough error
+    tell application "System Events"
+        repeat 30 times
+            if exists uiElement then return
+            delay 0.1
+        end repeat
+    end tell
+end waitForElement
 
 on displayMsg(msg, autoCloseTimeout)
     if autoCloseTimeout is missing value then set autoCloseTimeout to 0
@@ -344,11 +449,12 @@ Also can optionally toggle Bluetooth off, when setting `No One` discoverability 
 The workflow uses an AppleScript to click on UI controls, which means two things:
 
 1. You will see windows (*Finder, Control Centre, etc*) openning and closing, buttons/toggles being clicked/toggled, which is not a great user experience. Unfortunatelly, Apple doesn't provide an API for performing these operations in a less ugly manner;
-2. The script heavily relies on UI controls ordinals, since there are no IDs or labels, which means that it might stop working correctly in one of the next Mac OS versions. Currently tested versions are:
+2. The script mostly relies on UI controls ordinals, since most of the controls have no IDs or labels (*in Mac OS 27 some of them do have identifiers, such as the Menu Bar icons, and the script finds those by their identifiers instead*), which means that it might stop working correctly in one of the next Mac OS versions. Currently tested versions are:
     - Mac OS `13.5.2`, workflow version `0.9.2`;
     - Mac OS `14.4`, workflow version `0.9.2`;
     - Mac OS `15.5`, workflow version `1.0.0`;
-    - Mac OS `26.4.1`, workflow version `1.0.0`.
+    - Mac OS `26.4.1`, workflow version `1.0.0`;
+    - Mac OS `27.2.1`, workflow version `2026.11.21`.
 
 You can get rid of Finder window showing up by adding AirDrop icon to Menu Bar via Control Centre Modules in System Settings.</string>
 	<key>uidata</key>
@@ -398,7 +504,7 @@ You can get rid of Finder window showing up by adding AirDrop icon to Menu Bar v
 		</dict>
 	</array>
 	<key>version</key>
-	<string>1.0.0</string>
+	<string>2026.11.21</string>
 	<key>webaddress</key>
 	<string>https://github.com/retifrav/alfred-airdrop-discoverability</string>
 </dict>
